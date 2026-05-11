@@ -19,17 +19,32 @@ function App() {
     audio.volume = 0.35;
     audio.loop = true;
 
-    // Try immediate autoplay
-    audio.play()
-      .then(() => setMusicStarted(true))
-      .catch(() => {
-        // Browser blocked it — wait for first user interaction
-        const play = () => {
-          audio.play().then(() => setMusicStarted(true)).catch(() => { });
-          document.removeEventListener('click', play);
-        };
-        document.addEventListener('click', play);
-      });
+    const attemptPlay = () => {
+      audio.play()
+        .then(() => {
+          setMusicStarted(true);
+          removeListeners();
+        })
+        .catch(() => console.log("Autoplay blocked, waiting for interaction..."));
+    };
+
+    const removeListeners = () => {
+      document.removeEventListener('click', attemptPlay);
+      document.removeEventListener('keydown', attemptPlay);
+      document.removeEventListener('touchstart', attemptPlay);
+      document.removeEventListener('scroll', attemptPlay);
+    };
+
+    // 1. Try immediately
+    attemptPlay();
+
+    // 2. Add listeners for any possible user action
+    document.addEventListener('click', attemptPlay);
+    document.addEventListener('keydown', attemptPlay);
+    document.addEventListener('touchstart', attemptPlay);
+    document.addEventListener('scroll', attemptPlay);
+
+    return () => removeListeners();
   }, []);
 
   useEffect(() => {
