@@ -30,7 +30,39 @@ export const downloadVideo = async (
   if (!node) return false;
 
   try {
+    // ── Freeze all CSS animations so toPng captures a clean, stable frame ──
+    const allElements = node.querySelectorAll<HTMLElement>('*');
+    const prevStyles: { el: HTMLElement; animation: string; transform: string }[] = [];
+    allElements.forEach(el => {
+      const computed = getComputedStyle(el);
+      prevStyles.push({
+        el,
+        animation: el.style.animation,
+        transform: el.style.transform,
+      });
+      el.style.animation = 'none';
+      // Reset any mid-flight translateY from fade-in / float
+      const tx = computed.transform;
+      if (tx && tx !== 'none') {
+        el.style.transform = 'none';
+      }
+    });
+    // Also freeze the node itself
+    const nodeAnim = node.style.animation;
+    node.style.animation = 'none';
+
+    // Wait one frame so the browser applies the frozen styles before capture
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => requestAnimationFrame(r));
+
     const dataUrl = await toPng(node, { quality: 1.0, pixelRatio: 2 });
+
+    // ── Restore animations ──
+    prevStyles.forEach(({ el, animation, transform }) => {
+      el.style.animation = animation;
+      el.style.transform = transform;
+    });
+    node.style.animation = nodeAnim;
 
     return new Promise((resolve) => {
       const img = new Image();
