@@ -36,11 +36,26 @@ export const downloadVideo = async (
       const img = new Image();
 
       img.onload = () => {
+        const CANVAS_W = 1080;
+        const CANVAS_H = 1920;
+
         const canvas = document.createElement('canvas');
-        canvas.width = 1080;
-        canvas.height = 1920;
+        canvas.width = CANVAS_W;
+        canvas.height = CANVAS_H;
         const ctx = canvas.getContext('2d');
         if (!ctx) { resolve(false); return; }
+
+        // ── Compute "contain" fit so the full card is always visible ──
+        // 5% horizontal padding, 10% vertical padding so card never touches edges
+        const PAD_X = CANVAS_W * 0.05;
+        const PAD_Y = CANVAS_H * 0.10;
+        const maxW = CANVAS_W - PAD_X * 2;
+        const maxH = CANVAS_H - PAD_Y * 2;
+        const containScale = Math.min(maxW / img.width, maxH / img.height);
+        const baseW = img.width * containScale;
+        const baseH = img.height * containScale;
+        const baseX = (CANVAS_W - baseW) / 2;
+        const baseY = (CANVAS_H - baseH) / 2;
 
         // ── Canvas stream ──────────────────────────────────────
         const canvasStream = canvas.captureStream(30);
@@ -48,20 +63,16 @@ export const downloadVideo = async (
         // ── Audio: reuse existing source node if already created ─
         if (audioElement) {
           try {
-            // Create AudioContext only once
             if (!_audioCtx || _audioCtx.state === 'closed') {
               _audioCtx = new AudioContext();
             }
-            // Create source node only once per audio element
             if (!_audioSourceNode) {
               _audioSourceNode = _audioCtx.createMediaElementSource(audioElement);
-              _audioSourceNode.connect(_audioCtx.destination); // keep playing to speakers
+              _audioSourceNode.connect(_audioCtx.destination);
             }
             const dest = _audioCtx.createMediaStreamDestination();
             _audioSourceNode.connect(dest);
             dest.stream.getAudioTracks().forEach(t => canvasStream.addTrack(t));
-
-            // Disconnect from recording dest after recording stops
             canvasStream.addEventListener('inactive', () => {
               try { _audioSourceNode?.disconnect(dest); } catch (_) { }
             });
@@ -100,16 +111,12 @@ export const downloadVideo = async (
           resolve(true);
         };
 
-        // Safety net: if onstop never fires within 5s after duration ends, force resolve
         let safetyCalled = false;
         const safetyResolve = () => {
-          if (!safetyCalled) {
-            safetyCalled = true;
-            resolve(false);
-          }
+          if (!safetyCalled) { safetyCalled = true; resolve(false); }
         };
 
-        mediaRecorder.start(200); // emit data every 200ms
+        mediaRecorder.start(200);
 
         // ── Animation loop ──────────────────────────────────────
         const DURATION = 16000;
@@ -118,8 +125,8 @@ export const downloadVideo = async (
         let stopped = false;
 
         const particles = Array.from({ length: 55 }, () => ({
-          x: Math.random() * 1080,
-          y: Math.random() * 1920 - 1920,
+          x: Math.random() * CANVAS_W,
+          y: Math.random() * CANVAS_H - CANVAS_H,
           size: Math.random() * 18 + 8,
           speed: Math.random() * 3 + 1.5,
           rotation: Math.random() * Math.PI * 2,
@@ -132,10 +139,9 @@ export const downloadVideo = async (
           stopped = true;
           cancelAnimationFrame(animFrame);
           if (mediaRecorder.state !== 'inactive') {
-            mediaRecorder.requestData(); // flush remaining data
+            mediaRecorder.requestData();
             setTimeout(() => {
               try { mediaRecorder.stop(); } catch (_) { }
-              // If onstop hasn't fired in 4 more seconds, give up
               setTimeout(safetyResolve, 4000);
             }, 300);
           } else {
@@ -148,29 +154,49 @@ export const downloadVideo = async (
           const progress = Math.min(elapsed / DURATION, 1);
           onProgress(Math.round(progress * 100));
 
-          // Background
-          ctx.fillStyle = '#1a0505';
-          ctx.fillRect(0, 0, 1080, 1920);
+          // ── Decorative background: warm saffron-maroon gradient ──
+          const bgGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+          bgGrad.addColorStop(0, '#2a0a00');
+          bgGrad.addColorStop(0.4, '#5a1a00');
+          bgGrad.addColorStop(0.7, '#3d0e00');
+          bgGrad.addColorStop(1, '#1a0505');
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-          // Ken Burns zoom
-          const baseScale = Math.max(1080 / img.width, 1920 / img.height);
-          const zoom = 1 + progress * 0.12;
-          const w = img.width * baseScale * zoom;
-          const h = img.height * baseScale * zoom;
-          ctx.drawImage(img, (1080 - w) / 2, (1920 - h) / 2, w, h);
+          // Radial glow behind card
+          const glow = ctx.createRadialGradient(CANVAS_W / 2, CANVAS_H / 2, 100, CANVAS_W / 2, CANVAS_H / 2, 700);
+          glow.addColorStop(0, 'rgba(255,160,0,0.18)');
+          glow.addColorStop(0.5, 'rgba(180,60,0,0.10)');
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-          // Vignette
-          const vig = ctx.createRadialGradient(540, 960, 270, 540, 960, 900);
+          // ── Ken Burns: gentle 6% zoom, fully contained — nothing cropped ──
+          const zoom = 1 + progress * 0.06;
+          const w = baseW * zoom;
+          const h = baseH * zoom;
+          const x = baseX + (baseW - w) / 2;
+          const y = baseY + (baseH - h) / 2;
+
+          // Drop shadow behind card
+          ctx.save();
+          ctx.shadowColor = 'rgba(0,0,0,0.65)';
+          ctx.shadowBlur = 60;
+          ctx.drawImage(img, x, y, w, h);
+          ctx.restore();
+
+          // ── Vignette ──
+          const vig = ctx.createRadialGradient(CANVAS_W / 2, CANVAS_H / 2, 300, CANVAS_W / 2, CANVAS_H / 2, 950);
           vig.addColorStop(0, 'rgba(0,0,0,0)');
-          vig.addColorStop(1, 'rgba(0,0,0,0.5)');
+          vig.addColorStop(1, 'rgba(0,0,0,0.55)');
           ctx.fillStyle = vig;
-          ctx.fillRect(0, 0, 1080, 1920);
+          ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-          // Petals
+          // ── Falling petals ──
           particles.forEach(p => {
             p.y += p.speed;
             p.rotation += p.rotSpeed;
-            if (p.y > 1980) { p.y = -60; p.x = Math.random() * 1080; }
+            if (p.y > CANVAS_H + 60) { p.y = -60; p.x = Math.random() * CANVAS_W; }
             ctx.save();
             ctx.translate(p.x, p.y);
             ctx.rotate(p.rotation);
@@ -187,15 +213,15 @@ export const downloadVideo = async (
             ctx.restore();
           });
 
-          // Fade in
+          // ── Fade in ──
           if (progress < 0.07) {
             ctx.fillStyle = `rgba(0,0,0,${1 - progress / 0.07})`;
-            ctx.fillRect(0, 0, 1080, 1920);
+            ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
           }
-          // Fade out
+          // ── Fade out ──
           if (progress > 0.9) {
             ctx.fillStyle = `rgba(0,0,0,${(progress - 0.9) / 0.1})`;
-            ctx.fillRect(0, 0, 1080, 1920);
+            ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
           }
 
           if (progress < 1) {
