@@ -90,7 +90,6 @@ function App() {
       <div className="background-image" />
       <div className="bg-overlay" />
 
-      {/* Top-right controls */}
       <div className="top-controls">
         <button className="icon-btn" onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}>
           {isMuted ? <VolumeX size={17} /> : <Music size={17} />}
@@ -141,7 +140,7 @@ function App() {
 
             <div className="card-ornament top-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
             <div className="om-symbol">ॐ</div>
-            <h1 className="event-title">रामायण पाठ</h1>
+            <h1 className="event-title">अखंड रामायण पाठ</h1>
             <h2 className="event-subtitle">निमंत्रण</h2>
 
             <div className="divider"><span className="divider-diya">🪔</span></div>
@@ -155,12 +154,12 @@ function App() {
               <div className="detail-item">
                 <span className="detail-label">हवन एवं पूर्णाहुति</span>
                 <span className="detail-value">19 मई 2026, मंगलवार</span>
-                <span className="detail-sub">प्रातः 11:00 बजे</span>
+                <span className="detail-sub">प्रातः 11:30 बजे</span>
               </div>
               <div className="detail-sep" />
               <div className="detail-item address-box">
                 <span className="detail-label">📍 स्थान</span>
-                <span className="detail-value">38क/192-1, त्रिवेणी नगर प्रथम</span>
+                <span className="detail-value">538क/192-1, त्रिवेणी नगर प्रथम</span>
                 <span className="detail-sub">लखनऊ, उत्तर प्रदेश</span>
               </div>
             </div>
