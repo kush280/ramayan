@@ -112,7 +112,7 @@ export const downloadVideo = async (
         mediaRecorder.start(200); // emit data every 200ms
 
         // ── Animation loop ──────────────────────────────────────
-        const DURATION = 8000;
+        const DURATION = 16000;
         const startTime = performance.now();
         let animFrame: number;
         let stopped = false;
