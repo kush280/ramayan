@@ -218,13 +218,14 @@
   animation-delay: 0.4s;
 }
 
-/* ─── Invitation card ──────────────────────────────────────── */
+/* ─── Invitation wrapper ───────────────────────────────────── */
 .invitation-wrapper {
   display: flex;
   justify-content: center;
   flex-shrink: 0;
 }
 
+/* ─── Invitation card — background image version ───────────── */
 .invitation-card {
   width: 520px;
   max-width: 100%;
@@ -232,15 +233,57 @@
   text-align: center;
   position: relative;
   animation: fade-in 1s ease-out;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid var(--gold-dark);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    inset 0 0 30px rgba(184, 134, 11, 0.15),
+    0 0 0 1px rgba(255, 215, 0, 0.08);
+
+  /* Ram Darbar as background */
+  background-image:
+    linear-gradient(to bottom,
+      rgba(20, 4, 4, 0.38) 0%,
+      rgba(12, 2, 2, 0.72) 38%,
+      rgba(6, 1, 1, 0.93) 60%,
+      rgba(4, 0, 0, 0.98) 100%),
+    url('/ramdarbar.jpg');
+  background-size: cover;
+  background-position: center top;
 }
 
-/* Corners */
+/* Top shimmer lines */
+.invitation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+  z-index: 1;
+}
+
+.invitation-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+  z-index: 1;
+}
+
+/* ─── Corners ──────────────────────────────────────────────── */
 .corner {
   position: absolute;
   width: 55px;
   height: 55px;
   border: 2px solid var(--gold-dark);
-  opacity: 0.75;
+  opacity: 0.85;
+  z-index: 2;
 }
 
 .corner-tl {
@@ -271,12 +314,14 @@
   border-top: none;
 }
 
-/* Ornaments */
+/* ─── Ornaments ────────────────────────────────────────────── */
 .card-ornament {
   font-size: 0.85rem;
   color: var(--gold-dark);
   letter-spacing: 6px;
-  opacity: 0.8;
+  opacity: 0.85;
+  position: relative;
+  z-index: 2;
 }
 
 .top-ornament {
@@ -288,37 +333,49 @@
 }
 
 .om-symbol {
-  font-size: 4rem;
-  color: var(--primary-color);
-  margin-bottom: 0.6rem;
-  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  font-size: 4.2rem;
+  color: #FFD700;
+  margin-bottom: 0.4rem;
+  text-shadow:
+    0 0 30px rgba(255, 215, 0, 0.5),
+    0 3px 10px rgba(0, 0, 0, 0.5);
   animation: float 4s ease-in-out infinite;
   display: block;
+  position: relative;
+  z-index: 2;
 }
 
 .event-title {
-  color: var(--primary-color);
-  font-size: 3rem;
-  line-height: 1.1;
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.6);
+  color: #FFD700;
+  font-size: 2.8rem;
+  line-height: 1.15;
+  text-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.9),
+    0 0 40px rgba(255, 215, 0, 0.2);
   margin-bottom: 0.3rem;
+  position: relative;
+  z-index: 2;
 }
 
 .event-subtitle {
   font-family: 'Yatra One', serif;
   font-weight: 400;
-  font-size: 1.6rem;
-  color: var(--gold-dark);
+  font-size: 1.5rem;
+  color: #FF8C00;
   margin-bottom: 0.5rem;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  position: relative;
+  z-index: 2;
 }
 
-/* Divider with diya */
+/* ─── Divider ──────────────────────────────────────────────── */
 .divider {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin: 1.6rem 0;
+  position: relative;
+  z-index: 2;
 }
 
 .divider::before,
@@ -326,29 +383,31 @@
   content: '';
   flex: 1;
   height: 1.5px;
-  background: linear-gradient(90deg, transparent, var(--gold-dark));
+  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.7));
 }
 
 .divider::after {
-  background: linear-gradient(90deg, var(--gold-dark), transparent);
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.7), transparent);
 }
 
 .divider-diya {
   font-size: 1.4rem;
 }
 
-/* Details */
+/* ─── Details grid ─────────────────────────────────────────── */
 .details-grid {
   display: flex;
   flex-direction: column;
   gap: 0;
   margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .detail-sep {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.3), transparent);
-  margin: 1.2rem 0;
+  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.4), transparent);
+  margin: 1.1rem 0;
 }
 
 .detail-item {
@@ -359,59 +418,65 @@
 }
 
 .detail-label {
-  font-size: 0.78rem;
-  color: var(--secondary-color);
+  font-size: 0.75rem;
+  color: #FF8C00;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
   font-weight: 700;
 }
 
 .detail-value {
-  font-size: 1.25rem;
-  color: var(--text-dark);
+  font-size: 1.2rem;
+  color: #FFF8E1;
   font-weight: 600;
   line-height: 1.35;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
 .detail-sub {
-  font-size: 1rem;
-  color: var(--primary-color);
-  font-weight: 600;
+  font-size: 0.95rem;
+  color: #FFD700;
+  font-weight: 500;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
 .address-box {
-  background: rgba(255, 140, 0, 0.08);
+  background: rgba(139, 0, 0, 0.2);
   padding: 1.1rem 1.5rem;
   border-radius: 10px;
-  border: 1px solid rgba(184, 134, 11, 0.28);
+  border: 1px solid rgba(184, 134, 11, 0.35);
   gap: 0.35rem;
+  backdrop-filter: blur(4px);
 }
 
-/* Footer */
+/* ─── Footer ───────────────────────────────────────────────── */
 .invite-footer {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: 2rem;
+  position: relative;
+  z-index: 2;
 }
 
 .invite-rule {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dark));
+  background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.7));
 }
 
 .invite-footer .invite-rule:last-child {
-  background: linear-gradient(90deg, var(--gold-dark), transparent);
+  background: linear-gradient(90deg, rgba(184, 134, 11, 0.7), transparent);
 }
 
 .invite-text {
   font-weight: 700;
-  color: var(--primary-color);
-  font-size: 1.05rem;
+  color: #FFD700;
+  font-size: 1rem;
   white-space: nowrap;
-  font-family: 'Yatra One', serif;
+  font-family: 'Mukta', sans-serif;
   letter-spacing: 0.5px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
 
 /* ─── Recording overlay ────────────────────────────────────── */
@@ -493,5 +558,16 @@
 @keyframes spin-anim {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ─── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .invitation-card {
+    padding: 2.5rem 1.8rem;
+  }
+
+  .event-title {
+    font-size: 2.2rem;
   }
 }

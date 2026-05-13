@@ -35,10 +35,8 @@ function App() {
       document.removeEventListener('scroll', attemptPlay);
     };
 
-    // 1. Try immediately
     attemptPlay();
 
-    // 2. Add listeners for any possible user action
     document.addEventListener('click', attemptPlay);
     document.addEventListener('keydown', attemptPlay);
     document.addEventListener('touchstart', attemptPlay);
@@ -134,9 +132,14 @@ function App() {
         </div>
 
         <div className="invitation-wrapper">
-          <div id="invitation-card" className="invitation-card glass-panel">
+          {/* ── Ram Darbar image is now the card's CSS background ── */}
+          <div id="invitation-card" className="invitation-card">
             <div className="corner corner-tl" /><div className="corner corner-tr" />
             <div className="corner corner-bl" /><div className="corner corner-br" />
+
+            {/* Shimmer lines at top & bottom edge */}
+            <div className="card-shimmer-top" />
+            <div className="card-shimmer-bottom" />
 
             <div className="card-ornament top-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
             <div className="om-symbol">ॐ</div>
@@ -149,6 +152,7 @@ function App() {
               <div className="detail-item">
                 <span className="detail-label">प्रारंभ तिथि</span>
                 <span className="detail-value">18 मई 2026, सोमवार</span>
+                <span className="detail-sub">प्रातः 09:00 बजे</span>
               </div>
               <div className="detail-sep" />
               <div className="detail-item">
@@ -159,7 +163,8 @@ function App() {
               <div className="detail-sep" />
               <div className="detail-item address-box">
                 <span className="detail-label">📍 स्थान</span>
-                <span className="detail-value">538क/192-1, त्रिवेणी नगर प्रथम</span>
+                <span className="detail-value">538क/192-1, त्रिवेणी नगर</span>
+                <span className="detail-sub">निकट: गुप्ता आटा चक्की, त्रिवेणी नगर प्रथम</span>
                 <span className="detail-sub">लखनऊ, उत्तर प्रदेश</span>
               </div>
             </div>
